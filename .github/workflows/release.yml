@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*' # Trigger when you push a tag like v1.0.0, v1.1.0 etc.
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build & Release
