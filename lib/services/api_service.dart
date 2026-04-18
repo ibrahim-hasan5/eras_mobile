@@ -17,40 +17,58 @@ class ApiService {
   static const String baseUrl = 'https://eras-1.onrender.com'; 
 
   Future<bool> login(String username, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/accounts/api/login/'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'username': username, 'password': password}),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/accounts/api/login/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'username': username, 'password': password}),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['token']);
-      await prefs.setString('user_type', data['user']['user_type']);
-      return true;
+      print('Login Status: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['token']);
+        await prefs.setString('user_type', data['user']['user_type']);
+        return true;
+      }
+      print('Login Failed Body: ${response.body}');
+      return false;
+    } catch (e) {
+      print('Login Exception: $e');
+      return false;
     }
-    return false;
   }
 
   Future<bool> register(Map<String, dynamic> data) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/accounts/api/register/'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(data),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/accounts/api/register/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(data),
+      );
 
-    if (response.statusCode == 201) {
-      // Registration successful and token returned
-      final responseData = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', responseData['token']);
-      await prefs.setString('user_type', responseData['user']['user_type']);
-      return true;
+      print('Register Status: ${response.statusCode}');
+      if (response.statusCode == 201) {
+        final responseData = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', responseData['token']);
+        await prefs.setString('user_type', responseData['user']['user_type']);
+        return true;
+      }
+      
+      print('Registration failed body: ${response.body}');
+      return false;
+    } catch (e) {
+      print('Register Exception: $e');
+      return false;
     }
-    
-    print('Registration failed: ${response.body}');
-    return false;
   }
 
   Future<Map<String, dynamic>> getDashboard() async {
